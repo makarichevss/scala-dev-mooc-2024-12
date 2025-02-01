@@ -167,64 +167,95 @@ object hof{
 		case _ => None
 	}
 
+	/**
+	 *
+	 * Реализовать односвязанный иммутабельный список List
+	 * Список имеет два случая:
+	 * Nil - пустой список
+	 * Cons - непустой, содержит первый элемент (голову) и хвост (оставшийся список)
+	 */
  object list {
-   /**
-    *
-    * Реализовать односвязанный иммутабельный список List
-    * Список имеет два случая:
-    * Nil - пустой список
-    * Cons - непустой, содержит первый элемент (голову) и хвост (оставшийся список)
-    */
 
    trait List[+T]{
-     def ::[TT >: T](elem: TT): List[TT] = ???
+     def ::[TT >: T](elem: TT): List[TT] = new ::(elem, this)
+
+	   /**
+	    *
+	    * Реализовать метод map для списка который будет применять некую ф-цию к элементам данного списка
+	    */
+	   def map[B](f: T => B): List[B] = {
+		   @tailrec
+		   def loop(lst: List[T], acc: List[B]): List[B] =
+			   lst match {
+				   case Nil => acc
+				   case h :: tail => loop(tail, f(h) :: acc)
+			   }
+		   loop(this, Nil)
+	   }
+
+	   /**
+	    *
+	    * Реализовать метод filter для списка который будет фильтровать список по некому условию
+	    */
+	   def filter(f: T => Boolean): List[T] = {
+		   @tailrec
+		   def loop(lst: List[T], acc: List[T]): List[T] =
+			   lst match {
+				   case Nil => acc.reverse
+				   case h :: tail => if(f(h)) loop(tail, h :: acc) else loop(tail, acc)
+			   }
+			    loop(this, Nil)
+	   }
+
+	   /**
+	    *
+	    * Реализовать метод reverse который позволит заменить порядок элементов в списке на противоположный
+	    */
+	   def reverse: List[T] = {
+		   @tailrec
+		   def loop(src: List[T], acc: List[T]): List[T] =
+			   src match {
+				   case Nil => acc
+				   case h :: tail => loop(tail, h :: acc)
+			   }
+		   loop(this, Nil)
+	   }
    }
 
    case class ::[T](head: T, tail: List[T]) extends List[T]
    case object Nil extends List[Nothing]
 
-   object List{
-     def apply[A](v: A*): List[A] = if(v.isEmpty) Nil
-     else new ::(v.head, apply(v.tail:_*))
-   }
+	/**
+	 * Конструктор, позволяющий создать список из N - го числа аргументов
+	 * Для этого можно воспользоваться *
+	 *
+	 * Например вот этот метод принимает некую последовательность аргументов с типом Int и выводит их на печать
+	 * def printArgs(args: Int*) = args.foreach(println(_))
+	 */
+	 object List {
+		 def apply[A](v: A*): List[A] =
+			 if (v.isEmpty) Nil
+			 else ::(v.head, apply(v.tail: _*))
+	 }
 
    val l1: List[Nothing] = List()
-   val l2 = List(1, 2, 3)
-
-    /**
-      * Конструктор, позволяющий создать список из N - го числа аргументов
-      * Для этого можно воспользоваться *
-      * 
-      * Например вот этот метод принимает некую последовательность аргументов с типом Int и выводит их на печать
-      * def printArgs(args: Int*) = args.foreach(println(_))
-      */
-
-    /**
-      *
-      * Реализовать метод reverse который позволит заменить порядок элементов в списке на противоположный
-      */
-
-    /**
-      *
-      * Реализовать метод map для списка который будет применять некую ф-цию к элементам данного списка
-      */
-
-    /**
-      *
-      * Реализовать метод filter для списка который будет фильтровать список по некому условию
-      */
+   val l2: List[Int] = List(1, 2, 3)
 
     /**
       *
       * Написать функцию incList котрая будет принимать список Int и возвращать список,
       * где каждый элемент будет увеличен на 1
       */
+	 def incList(lst: List[Int]): List[Int] = {
+		 lst.map(x => x + 1)
+	 }
 
     /**
       *
       * Написать функцию shoutString котрая будет принимать список String и возвращать список,
       * где к каждому элементу будет добавлен префикс в виде '!'
-      */
-
+      */ def shoutString(lst: List[String]): List[String] = {
+	    lst.map(s => "!" + s)
+    }
  }
 }
