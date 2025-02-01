@@ -3,24 +3,17 @@ package ru.otus.module1
 import scala.annotation.tailrec
 import scala.language.postfixOps
 
-
-
 /**
  * referential transparency
  */
 
-
-
-
  // recursion
-
 object recursion {
 
   /**
    * Реализовать метод вычисления n!
    * n! = 1 * 2 * ... n
    */
-
   def fact(n: Int): Int = {
     var _n = 1
     var i = 2
@@ -31,9 +24,7 @@ object recursion {
     _n
   }
 
-
   def factRec(n: Int): Int = if(n <= 0) 1 else n * factRec(n - 1)
-
 
   def factTailRec(n: Int): Int = {
     @tailrec
@@ -44,48 +35,36 @@ object recursion {
     loop(n, 1)
   }
 
-
-
-
   /**
    * реализовать вычисление N числа Фибоначчи
    * F0 = 0, F1 = 1, Fn = Fn-1 + Fn - 2
    */
 
-
 }
 
-
-
 object hof{
-
   def dumb(string: String): Unit = {
     Thread.sleep(1000)
     println(string)
   }
 
   // обертки
-
-  def logRunningTime[A, B](f: A => B): A => B = a => {
-    val start = System.currentTimeMillis()
-    val result: B = f(a)
-    val end = System.currentTimeMillis()
-    println(s"Running time: ${end - start}")
-    result
-  }
-
-
-
+  def logRunningTime[A, B](f: A => B): A => B =
+	  a => {
+		  val start = System.currentTimeMillis()
+		  val result: B = f(a)
+		  val end = System.currentTimeMillis()
+		  println(s"Running time: ${end - start}")
+		  result
+	  }
   // изменение поведения ф-ции
-
 
   def isOdd(i: Int): Boolean = i % 2 > 0
 
-  def not[A](f: A => Boolean): A => Boolean = a => !f(a)
+  def not[A](f: A => Boolean): A => Boolean =
+	  a => !f(a)
 
   lazy val isEven: Int => Boolean = not(isOdd)
-
-
 
   // изменение самой функции
 
@@ -94,47 +73,17 @@ object hof{
 
   def partial2[A, B, C](a: A, f: (A, B) => C): B => C = f.curried(a)
 
-
   def sum(x: Int, y: Int): Int = x + y
-
 
   val p: Int => Int = partial(3, sum)
   p(2) // 5
   p(3) // 5
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 }
-
-
-
-
-
 
 /**
  *  Реализуем тип Option
  */
-
-
-
  object opt {
-
 
   class Animal
   class Dog extends Animal
@@ -157,23 +106,29 @@ object hof{
   // 1. Invariance
   // 2. Covariance
   // 3. Contrvariance
-
   trait Option[+T]{
     def isEmpty: Boolean = if(this.isInstanceOf[None.type]) true else false
 
-    def get: T = ???
+    def get: T =
+	    this match {
+		    case Some(v) => v
+		    case None => throw new NoSuchElementException("No value")
+	    }
 
     def map[B](f: T => B): Option[B] = flatMap(v => Option(f(v)))
 
-    def flatMap[B](f: T => Option[B]): Option[B] = ???
+    def flatMap[B](f: T => Option[B]): Option[B] =
+	    this match {
+		    case Some(v) => f(v)
+		    case None => None
+	    }
   }
 
   object Option{
     def apply[T](v: T): Option[T] = Some(v)
   }
 
-  val o1: Option[Int] = ???
-
+  val o1: Option[Int] = Some(5)
   val o2: Option[Int] = o1.map(_ + 2)
 
   case class Some[T](v: T) extends Option[T]
@@ -182,32 +137,35 @@ object hof{
   var o: Option[Animal] = None
   var i: Option[Int] = None
 
-
-
-
-
-
-
   /**
    *
    * Реализовать метод printIfAny, который будет печатать значение, если оно есть
    */
-    def printIfAny = ???
+  def printIfAny[T](o: Option[T]): Unit =
+	  o match {
+		  case Some(value) => println(value)
+		  case None => ()
+	  }
 
+	/**
+	 *
+	 * Реализовать метод zip, который будет создавать Option от пары значений из 2-х Option
+	 */
+	def zip[T, U](opt1: Option[T], opt2: Option[U]): Option[(T, U)] =
+		(opt1, opt2) match {
+			case (Some(v1), Some(v2)) => Some((v1, v2))
+			case _ => None
+		}
 
-  /**
-   *
-   * Реализовать метод zip, который будет создавать Option от пары значений из 2-х Option
-   */
-  def zip = ???
-
-  /**
-   *
-   * Реализовать метод filter, который будет возвращать не пустой Option
-   * в случае если исходный не пуст и предикат от значения = true
-   */
-  def filter = ???
- }
+	/**
+	 *
+	 * Реализовать метод filter, который будет возвращать не пустой Option
+	 * в случае если исходный не пуст и предикат от значения = true
+	 */
+	def filter[T](opt: Option[T], predicate: T => Boolean): Option[T] = opt match {
+		case Some(value) if predicate(value) => Some(value)
+		case _ => None
+	}
 
  object list {
    /**
@@ -218,10 +176,10 @@ object hof{
     * Cons - непустой, содержит первый элемент (голову) и хвост (оставшийся список)
     */
 
-
    trait List[+T]{
      def ::[TT >: T](elem: TT): List[TT] = ???
    }
+
    case class ::[T](head: T, tail: List[T]) extends List[T]
    case object Nil extends List[Nothing]
 
@@ -232,8 +190,6 @@ object hof{
 
    val l1: List[Nothing] = List()
    val l2 = List(1, 2, 3)
-
-
 
     /**
       * Конструктор, позволяющий создать список из N - го числа аргументов
@@ -253,7 +209,6 @@ object hof{
       * Реализовать метод map для списка который будет применять некую ф-цию к элементам данного списка
       */
 
-
     /**
       *
       * Реализовать метод filter для списка который будет фильтровать список по некому условию
@@ -265,7 +220,6 @@ object hof{
       * где каждый элемент будет увеличен на 1
       */
 
-
     /**
       *
       * Написать функцию shoutString котрая будет принимать список String и возвращать список,
@@ -273,3 +227,4 @@ object hof{
       */
 
  }
+}
