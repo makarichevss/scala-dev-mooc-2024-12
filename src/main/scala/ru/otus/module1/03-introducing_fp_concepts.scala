@@ -257,5 +257,5 @@ object hof{
       */ def shoutString(lst: List[String]): List[String] = {
 	    lst.map(s => "!" + s)
     }
- }
+  }
 }
